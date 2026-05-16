@@ -16,7 +16,8 @@ async function scrape() {
     };
     
     // Сохранение в json-файл
-    fs.writeFileSync('data.json', JSON.stringify(result, null, 2));
+    //fs.writeFileSync('data.json', JSON.stringify(result, null, 2));
+    fs.writeFileSync('../data.json', JSON.stringify(result));
     console.log('Данные успешно спарсены!');
   } catch (error) {
     console.error('Ошибка:', error);
