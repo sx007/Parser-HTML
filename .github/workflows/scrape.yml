@@ -7,25 +7,28 @@ on:
     branches: [ "main" ]
   workflow_dispatch:      # Позволяет запускать вручную из вкладки Actions
 
-
 jobs:
   build:
-    runs-on: ubuntu-latest # Use a GitHub-hosted runner
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4 # Downloads your code to the runner
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4 # Installs the specified Node version
-        with:
-          node-version: '20' # Specify version (e.g., 18, 20, or 'latest')
-
-      - name: Run tests
-        run: npm scraper.js
-
-      - name: Commit and push changes
-        uses: EndBug/add-and-commit@v9 # Экшен для автоматического коммита
-        with:
-          message: 'Update scraped data'
-          add: 'data.json'
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm scraper.js
+    - name: Commit and push changes
+      uses: EndBug/add-and-commit@v9 # Экшен для автоматического коммита
+      with:
+        message: 'Update scraped data'
+        add: 'data.json'
