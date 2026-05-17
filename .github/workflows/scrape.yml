@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci # Используйте npm install, если у вас нет package-lock.json
 
+      - name: Run install axios
+        run: npm install axios
+
       - name: Run Scraper
         run: node scraper.js
 
