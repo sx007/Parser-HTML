@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Универсальная страница</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        #content { padding: 15px; border: 1px solid #ccc; display: none; }
+        #loader { font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+
+    <div id="loader">Обработка параметров...</div>
+    <div id="content"></div>
+
+    <script>
+        // 1. Получаем параметры из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action'); // Параметр действия (load или download)
+        const data = urlParams.get('data') || 'Привет, мир!'; // Данные
+
+        const contentDiv = document.getElementById('content');
+        const loaderDiv = document.getElementById('loader');
+
+        // 2. Логика в зависимости от параметра action
+        if (action === 'load') {
+            // Сценарий 1: Загружаем/показываем HTML-данные
+            loaderDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+            contentDiv.innerHTML = `<h1>Загруженные данные:</h1><p>${decodeURIComponent(data)}</p>`;
+            
+        } else if (action === 'download') {
+            // Сценарий 2: Генерируем и скачиваем файл
+            loaderDiv.innerText = 'Файл генерируется и скачивается...';
+			
+			// 1. Текст события в формате ICS
+			const icsContent = [
+			  'BEGIN:VCALENDAR',
+			  'VERSION:2.0',
+			  'BEGIN:VEVENT',
+			  'SUMMARY:Встреча с разработчиком',
+			  'DESCRIPTION:Обсуждение нового проекта и задач.',
+			  'LOCATION:Онлайн (Zoom)',
+			  'DTSTART:20260901T100000Z',
+			  'DTEND:20260901T110000Z',
+			  'END:VEVENT',
+			  'END:VCALENDAR'
+			].join('\r\n');
+
+			// 2. Создание Blob с правильным MIME-типом
+			const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+
+			// 3. Создание ссылки и запуск скачивания
+			const link = document.createElement('a');
+			link.href = URL.createObjectURL(blob);
+			link.download = 'event.ics';
+			document.body.appendChild(link);
+			link.click();
+
+			// 4. Очистка памяти
+			document.body.removeChild(link);
+			URL.revokeObjectURL(link.href);
+            
+            loaderDiv.innerText = 'Файл успешно скачан!';
+            
+        } else {
+            // Если параметров нет или они неверные
+            loaderDiv.innerText = 'Передайте правильные параметры в URL. Пример: ?action=load или ?action=download';
+        }
+    </script>
+</body>
+</html>
