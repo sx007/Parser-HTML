@@ -1,0 +1,44 @@
+name: Update PAC File
+
+on:
+  schedule:
+    # Запуск каждые 6 часов (можно настроить под себя)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Позволяет запускать скрипт вручную кнопкой на GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Дает право GitHub Actions делать push в ваш репозиторий
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install axios
+
+      - name: Run script
+        run: node script.js # Укажите здесь правильное имя вашего js-файла
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@://github.com"
+          
+          # Проверяем, изменился ли файл, чтобы не делать пустые коммиты
+          if [ -n "$(git status --porcelain proxy.pac)" ]; then
+            git add proxy.pac
+            git commit -m "Auto-update proxy.pac: $(date -u +'%Y-%m-%d %H:%M:%S') UTC"
+            git push
+            echo "Файл proxy.pac успешно обновлен в репозитории!"
+          else
+            echo "Изменений в PAC-файле нет, коммит не требуется."
+          fi
