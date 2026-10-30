@@ -1,27 +1,24 @@
 const axios = require('axios');
-const cheerio = require('cheerio');
 const fs = require('fs');
 
-async function scrape() {
+async function downloadPac() {
+  const url = 'https://antizapret.prostovpn.org/proxy.pac';
+  
   try {
-    const { data } = await axios.get('https://example.com');
-    const $ = cheerio.load(data);
+    console.log('Скачивание PAC-файла...');
     
-    // Пример извлечения данных
-    const title = $('h1').text().trim();
+    // Делаем запрос к AntiZapret
+    const response = await axios.get(url, {
+      responseType: 'text' // Указываем, что ждем текстовый файл
+    });
     
-    const result = {
-      title,
-      date: new Date().toISOString()
-    };
+    // Сохраняем полученный скрипт как proxy.pac
+    fs.writeFileSync('proxy.pac', response.data, 'utf-8');
     
-    // Сохранение в json-файл
-    //fs.writeFileSync('data.json', JSON.stringify(result, null, 2));
-    fs.writeFileSync('data.json', JSON.stringify(result));
-    console.log('Данные успешно спарсены!');
+    console.log('Файл proxy.pac успешно скачан и сохранен!');
   } catch (error) {
-    console.error('Ошибка:', error);
+    console.error('Не удалось скачать файл:', error.message);
   }
 }
 
-scrape();
+downloadPac();
